@@ -39,10 +39,13 @@ public:
 
     virtual void show(QPoint p) = 0;
     virtual void hide() = 0;
+    virtual void setPosition(QPoint p) = 0;
 
     virtual QWindow* qWindow() const = 0;
     virtual bool isVisible() const = 0;
     virtual QRect geometry() const = 0;
+
+    virtual void setPosition(const QPoint& position) const = 0;
 
     virtual void forceActiveFocus() = 0;
 

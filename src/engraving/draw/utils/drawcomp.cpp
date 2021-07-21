@@ -76,7 +76,7 @@ static bool isEqual(const RectF& r1, const RectF& r2, double tolerance)
     return true;
 }
 
-static bool isEqual(const QSize& sz1, const QSize& sz2)
+static bool isEqual(const Size& sz1, const Size& sz2)
 {
     if (sz1.width() != sz2.width()) {
         return false;
@@ -89,13 +89,13 @@ static bool isEqual(const QSize& sz1, const QSize& sz2)
     return true;
 }
 
-static bool isEqual(const QPen& p1, const QPen& p2)
+static bool isEqual(const Pen& p1, const Pen& p2)
 {
     if (p1.style() != p2.style()) {
         return false;
     }
 
-    if (p1.width() != p2.width()) {
+    if (!RealIsEqual(p1.widthF(), p2.widthF())) {
         return false;
     }
 
@@ -106,7 +106,7 @@ static bool isEqual(const QPen& p1, const QPen& p2)
     return true;
 }
 
-static bool isEqual(const QBrush& b1, const QBrush& b2)
+static bool isEqual(const Brush& b1, const Brush& b2)
 {
     if (b1.style() != b2.style()) {
         return false;
@@ -140,7 +140,7 @@ static bool isEqual(const Font& f1, const Font& f2)
     return true;
 }
 
-static bool isEqual(const QTransform& t1, const QTransform& t2, double tolerance)
+static bool isEqual(const Transform& t1, const Transform& t2, double tolerance)
 {
     if (!isEqual(t1.m11(), t2.m11(), tolerance)) {
         return false;
@@ -210,15 +210,15 @@ static bool isEqual(const DrawData::State& s1, const DrawData::State& s2, DrawCo
     return true;
 }
 
-static bool isEqual(const QPainterPath& v1, const QPainterPath& v2, double tolerance)
+static bool isEqual(const PainterPath& v1, const PainterPath& v2, double tolerance)
 {
     if (v1.elementCount() != v2.elementCount()) {
         return false;
     }
 
     for (int i = 0; i < v1.elementCount(); ++i) {
-        QPainterPath::Element e1 = v1.elementAt(i);
-        QPainterPath::Element e2 = v2.elementAt(i);
+        PainterPath::Element e1 = v1.elementAt(i);
+        PainterPath::Element e2 = v2.elementAt(i);
 
         if (e1.type != e2.type) {
             return false;

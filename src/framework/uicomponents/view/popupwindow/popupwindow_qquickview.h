@@ -45,11 +45,14 @@ public:
     void setContent(QQuickItem* item) override;
 
     void show(QPoint p) override;
+    void setPosition(QPoint p) override;
     void hide() override;
 
     QWindow* qWindow() const override;
     bool isVisible() const override;
     QRect geometry() const override;
+
+    void setPosition(const QPoint& position) const override;
 
     void forceActiveFocus() override;
 

@@ -66,9 +66,13 @@ public:
     // Visibility
     void toggleVisible() override;
 
-    // Select
+    // Hit
     Element* hitElement(const PointF& pos, float width) const override;
-    int hitStaffIndex(const PointF& pos) const override;
+    Staff* hitStaff(const PointF& pos) const override;
+    const HitElementContext& hitElementContext() const override;
+    void setHitElementContext(const HitElementContext& context) override;
+
+    // Select
     void addChordToSelection(MoveDirection d) override;
     void moveChordNoteSelection(MoveDirection d) override;
     void select(const std::vector<Element*>& elements, SelectType type, int staffIndex = 0) override;
@@ -110,6 +114,7 @@ public:
     void editText(QKeyEvent* event) override;
     void endEditText() override;
     void changeTextCursorPosition(const PointF& newCursorPos) override;
+    const TextBase* editedText() const override;
     async::Notification textEditingStarted() const override;
     async::Notification textEditingChanged() const override;
 
@@ -161,6 +166,8 @@ public:
 
     void addStretch(qreal value) override;
 
+    void addTimeSignature(Measure* measure, int staffIndex, TimeSignature* timeSignature) override;
+
     void explodeSelectedStaff() override;
     void implodeSelectedStaff() override;
 
@@ -182,12 +189,19 @@ public:
     void setScoreConfig(ScoreConfig config) override;
     async::Channel<ScoreConfigType> scoreConfigChanged() const override;
 
+    void nextLyrics(bool = false, bool = false, bool = true) override;
+    void nextLyricsVerse(bool = false) override;
+    void nextSyllable() override;
+    void addMelisma() override;
+    void addLyricsVerse() override;
+
 private:
     Ms::Score* score() const;
 
     void startEdit();
     void apply();
 
+    void doSelect(const std::vector<Element*>& elements, SelectType type, int staffIndex);
     void notifyAboutDragChanged();
     void notifyAboutDropChanged();
     void notifyAboutSelectionChanged();
@@ -240,8 +254,8 @@ private:
 
     struct HitMeasureData
     {
-        int staffIndex = -1;
-        Ms::Measure* measure = nullptr;
+        Measure* measure = nullptr;
+        Staff* staff = nullptr;
     };
 
     HitMeasureData hitMeasure(const PointF& pos) const;
@@ -291,6 +305,7 @@ private:
     Ms::Lasso* m_lasso = nullptr;
 
     bool m_notifyAboutDropChanged = false;
+    HitElementContext m_hitElementContext;
 };
 }
 

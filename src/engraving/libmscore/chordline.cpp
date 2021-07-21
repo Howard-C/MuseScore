@@ -173,18 +173,18 @@ void ChordLine::read(XmlReader& e)
                     qreal x  = e.doubleAttribute("x");
                     qreal y  = e.doubleAttribute("y");
                     switch (PainterPath::ElementType(type)) {
-                    case PainterPath::MoveToElement:
+                    case PainterPath::ElementType::MoveToElement:
                         path.moveTo(x, y);
                         break;
-                    case PainterPath::LineToElement:
+                    case PainterPath::ElementType::LineToElement:
                         path.lineTo(x, y);
                         break;
-                    case PainterPath::CurveToElement:
+                    case PainterPath::ElementType::CurveToElement:
                         curveTo.rx() = x;
                         curveTo.ry() = y;
                         state = 1;
                         break;
-                    case PainterPath::CurveToDataElement:
+                    case PainterPath::ElementType::CurveToDataElement:
                         if (state == 1) {
                             p1.rx() = x;
                             p1.ry() = y;
@@ -251,8 +251,8 @@ void ChordLine::draw(mu::draw::Painter* painter) const
 
     if (this->isStraight()) {
         painter->scale(_spatium, _spatium);
-        painter->setPen(QPen(curColor(), .15, Qt::SolidLine));
-        painter->setBrush(Qt::NoBrush);
+        painter->setPen(Pen(curColor(), .15, PenStyle::SolidLine));
+        painter->setBrush(BrushStyle::NoBrush);
 
         PainterPath pathOffset = path;
         qreal offset = 0.5;
@@ -271,8 +271,8 @@ void ChordLine::draw(mu::draw::Painter* painter) const
         painter->scale(1.0 / _spatium, 1.0 / _spatium);
     } else {
         painter->scale(_spatium, _spatium);
-        painter->setPen(QPen(curColor(), .15, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->setBrush(Qt::NoBrush);
+        painter->setPen(Pen(curColor(), .15, PenStyle::SolidLine, PenCapStyle::RoundCap, PenJoinStyle::RoundJoin));
+        painter->setBrush(BrushStyle::NoBrush);
         painter->drawPath(path);
         painter->scale(1.0 / _spatium, 1.0 / _spatium);
     }
@@ -339,15 +339,15 @@ void ChordLine::editDrag(EditData& ed)
             y += dy;
         }
         switch (e.type) {
-        case PainterPath::CurveToDataElement:
+        case PainterPath::ElementType::CurveToDataElement:
             break;
-        case PainterPath::MoveToElement:
+        case PainterPath::ElementType::MoveToElement:
             p.moveTo(x, y);
             break;
-        case PainterPath::LineToElement:
+        case PainterPath::ElementType::LineToElement:
             p.lineTo(x, y);
             break;
-        case PainterPath::CurveToElement:
+        case PainterPath::ElementType::CurveToElement:
         {
             qreal x2 = path.elementAt(i + 1).x;
             qreal y2 = path.elementAt(i + 1).y;

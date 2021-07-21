@@ -20,9 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "painter.h"
-
-#include <QPainterPath>
-
+#include "brush.h"
+#include "painterpath.h"
 #include "log.h"
 
 #ifndef NO_QT_SUPPORT
@@ -73,16 +72,6 @@ void Painter::init()
     if (extended) {
         extended->beginTarget(m_name);
     }
-}
-
-QPaintDevice* Painter::device() const
-{
-    return m_provider->device();
-}
-
-QPainter* Painter::qpainter() const
-{
-    return m_provider->qpainter();
 }
 
 IPaintProviderPtr Painter::provider() const
@@ -159,7 +148,7 @@ const Font& Painter::font() const
     return m_provider->font();
 }
 
-void Painter::setPen(const QPen& pen)
+void Painter::setPen(const Pen& pen)
 {
     m_provider->setPen(pen);
     if (extended) {
@@ -169,15 +158,15 @@ void Painter::setPen(const QPen& pen)
 
 void Painter::setNoPen()
 {
-    setPen(QPen(Qt::NoPen));
+    setPen(Pen(PenStyle::NoPen));
 }
 
-const QPen& Painter::pen() const
+const Pen& Painter::pen() const
 {
     return m_provider->pen();
 }
 
-void Painter::setBrush(const QBrush& brush)
+void Painter::setBrush(const Brush& brush)
 {
     m_provider->setBrush(brush);
     if (extended) {
@@ -185,7 +174,7 @@ void Painter::setBrush(const QBrush& brush)
     }
 }
 
-const QBrush& Painter::brush() const
+const Brush& Painter::brush() const
 {
     return m_provider->brush();
 }
@@ -213,7 +202,7 @@ void Painter::restore()
     }
 }
 
-void Painter::setWorldTransform(const QTransform& matrix, bool combine)
+void Painter::setWorldTransform(const Transform& matrix, bool combine)
 {
     State& st = editableState();
     if (combine) {
@@ -225,7 +214,7 @@ void Painter::setWorldTransform(const QTransform& matrix, bool combine)
     updateMatrix();
 }
 
-const QTransform& Painter::worldTransform() const
+const Transform& Painter::worldTransform() const
 {
     return state().worldTransform;
 }
@@ -282,11 +271,11 @@ void Painter::setViewport(const RectF& viewport)
 
 // drawing functions
 
-void Painter::fillPath(const QPainterPath& path, const QBrush& brush)
+void Painter::fillPath(const PainterPath& path, const Brush& brush)
 {
-    QPen oldPen = this->pen();
-    QBrush oldBrush = this->brush();
-    setPen(QPen(Qt::NoPen));
+    Pen oldPen = this->pen();
+    Brush oldBrush = this->brush();
+    setPen(Pen(PenStyle::NoPen));
     setBrush(brush);
 
     drawPath(path);
@@ -295,12 +284,12 @@ void Painter::fillPath(const QPainterPath& path, const QBrush& brush)
     setBrush(oldBrush);
 }
 
-void Painter::strokePath(const QPainterPath& path, const QPen& pen)
+void Painter::strokePath(const PainterPath& path, const Pen& pen)
 {
-    QPen oldPen = this->pen();
-    QBrush oldBrush = this->brush();
+    Pen oldPen = this->pen();
+    Brush oldBrush = this->brush();
     setPen(pen);
-    setBrush(Qt::NoBrush);
+    setBrush(BrushStyle::NoBrush);
 
     drawPath(path);
 
@@ -308,7 +297,7 @@ void Painter::strokePath(const QPainterPath& path, const QPen& pen)
     setBrush(oldBrush);
 }
 
-void Painter::drawPath(const QPainterPath& path)
+void Painter::drawPath(const PainterPath& path)
 {
     m_provider->drawPath(path);
     if (extended) {
@@ -337,8 +326,8 @@ void Painter::drawLines(const PointF* pointPairs, size_t lineCount)
 void Painter::drawRects(const RectF* rects, size_t rectCount)
 {
     for (size_t i = 0; i < rectCount; ++i) {
-        QPainterPath path;
-        path.addRect(rects[i].toQRectF());
+        PainterPath path;
+        path.addRect(rects[i]);
         if (path.isEmpty()) {
             continue;
         }
@@ -348,8 +337,8 @@ void Painter::drawRects(const RectF* rects, size_t rectCount)
 
 void Painter::drawEllipse(const RectF& rect)
 {
-    QPainterPath path;
-    path.addEllipse(rect.toQRectF());
+    PainterPath path;
+    path.addEllipse(rect);
     m_provider->drawPath(path);
     if (extended) {
         extended->drawPath(path);
@@ -385,23 +374,23 @@ void Painter::drawArc(const RectF& r, int a, int alen)
 {
     //! NOTE Copied from QPainter source code
 
-    QRectF rect = r.toQRectF().normalized();
+    RectF rect = r.normalized();
 
-    QPainterPath path;
+    PainterPath path;
     path.arcMoveTo(rect, a / 16.0);
     path.arcTo(rect, a / 16.0, alen / 16.0);
     strokePath(path, pen());
 }
 
-void Painter::drawRoundedRect(const RectF& rect, qreal xRadius, qreal yRadius, Qt::SizeMode mode)
+void Painter::drawRoundedRect(const RectF& rect, qreal xRadius, qreal yRadius)
 {
     if (xRadius <= 0 || yRadius <= 0) {             // draw normal rectangle
         drawRect(rect);
         return;
     }
 
-    QPainterPath path;
-    path.addRoundedRect(rect.toQRectF(), xRadius, yRadius, mode);
+    PainterPath path;
+    path.addRoundedRect(rect, xRadius, yRadius);
     drawPath(path);
 }
 
@@ -437,11 +426,11 @@ void Painter::drawSymbol(const PointF& point, uint ucs4Code)
     }
 }
 
-void Painter::fillRect(const RectF& rect, const QBrush& brush)
+void Painter::fillRect(const RectF& rect, const Brush& brush)
 {
-    QPen oldPen = this->pen();
-    QBrush oldBrush = this->brush();
-    setPen(QPen(Qt::NoPen));
+    Pen oldPen = this->pen();
+    Brush oldBrush = this->brush();
+    setPen(Pen(mu::draw::PenStyle::NoPen));
     setBrush(brush);
 
     drawRect(rect);
@@ -450,6 +439,23 @@ void Painter::fillRect(const RectF& rect, const QBrush& brush)
     setPen(oldPen);
 }
 
+void Painter::drawPixmap(const PointF& point, const Pixmap& pm)
+{
+    m_provider->drawPixmap(point, pm);
+    if (extended) {
+        extended->drawPixmap(point, pm);
+    }
+}
+
+void Painter::drawTiledPixmap(const RectF& rect, const Pixmap& pm, const PointF& offset)
+{
+    m_provider->drawTiledPixmap(rect, pm, offset);
+    if (extended) {
+        extended->drawTiledPixmap(rect, pm, offset);
+    }
+}
+
+#ifndef NO_QT_SUPPORT
 void Painter::drawPixmap(const PointF& point, const QPixmap& pm)
 {
     m_provider->drawPixmap(point, pm);
@@ -466,6 +472,8 @@ void Painter::drawTiledPixmap(const RectF& rect, const QPixmap& pm, const PointF
     }
 }
 
+#endif
+
 Painter::State& Painter::editableState()
 {
     return m_states.top();
@@ -476,18 +484,18 @@ const Painter::State& Painter::state() const
     return m_states.top();
 }
 
-QTransform Painter::makeViewTransform() const
+Transform Painter::makeViewTransform() const
 {
     const State& st = state();
     qreal scaleW = qreal(st.viewport.width()) / qreal(st.window.width());
     qreal scaleH = qreal(st.viewport.height()) / qreal(st.window.height());
-    return QTransform(scaleW, 0, 0, scaleH, st.viewport.x() - st.window.x() * scaleW, st.viewport.y() - st.window.y() * scaleH);
+    return Transform(scaleW, 0, 0, scaleH, st.viewport.x() - st.window.x() * scaleW, st.viewport.y() - st.window.y() * scaleH);
 }
 
 void Painter::updateMatrix()
 {
     Painter::State& st = editableState();
-    st.transform = st.isWxF ? st.worldTransform : QTransform();
+    st.transform = st.isWxF ? st.worldTransform : Transform();
     if (st.isVxF) {
         st.transform *= st.viewTransform;
     }
@@ -496,4 +504,14 @@ void Painter::updateMatrix()
     if (extended) {
         extended->setTransform(st.transform);
     }
+}
+
+void Painter::setClipRect(const RectF& rect)
+{
+    m_provider->setClipRect(rect);
+}
+
+void Painter::setClipping(bool enable)
+{
+    m_provider->setClipping(enable);
 }

@@ -25,7 +25,7 @@
 #include "modularity/imodulesetup.h"
 
 namespace mu::palette {
-class PaletteModule : public framework::IModuleSetup
+class PaletteModule : public modularity::IModuleSetup
 {
 public:
     std::string moduleName() const override;
@@ -37,7 +37,7 @@ public:
     void registerUiTypes() override;
 
     void onInit(const framework::IApplication::RunMode& mode) override;
-    void onStartApp() override;
+    void onAllInited(const framework::IApplication::RunMode& mode) override;
 };
 }
 

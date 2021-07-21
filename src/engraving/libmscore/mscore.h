@@ -26,11 +26,11 @@
 #include <QPaintEngine>
 
 #include "config.h"
-#include "style.h"
+#include "style/style.h"
 
 namespace Ms {
-#define MSC_VERSION     "3.02"
-static constexpr int MSCVERSION = 302;
+#define MSC_VERSION     "4.00"
+static constexpr int MSCVERSION = 400;
 
 // History:
 //    1.3   added staff->_barLineSpan
@@ -74,6 +74,8 @@ static constexpr int MSCVERSION = 302;
 //    3.00  (Version 3.0 alpha)
 //    3.01  -
 //    3.02  Engraving improvements for 3.6
+
+//    4.00 (Version 4.0)
 
 class MStyle;
 class Sequencer;
@@ -251,17 +253,6 @@ constexpr bool operator&(BarLineType t1, BarLineType t2)
     return static_cast<int>(t1) & static_cast<int>(t2);
 }
 
-// Icon() subtypes
-enum class IconType : signed char {
-    NONE = -1,
-    ACCIACCATURA, APPOGGIATURA, GRACE4, GRACE16, GRACE32,
-    GRACE8_AFTER, GRACE16_AFTER, GRACE32_AFTER,
-    SBEAM, MBEAM, NBEAM, BEAM32, BEAM64, AUTOBEAM,
-    FBEAM1, FBEAM2,
-    VFRAME, HFRAME, TFRAME, FFRAME, MEASURE,
-    BRACKETS, PARENTHESES, BRACES,
-};
-
 //---------------------------------------------------------
 //   MScoreError
 //---------------------------------------------------------
@@ -302,23 +293,6 @@ struct MScoreError {
 };
 
 //---------------------------------------------------------
-//   MPaintDevice
-///   \cond PLUGIN_API \private \endcond
-//---------------------------------------------------------
-
-class MPaintDevice : public QPaintDevice
-{
-protected:
-    virtual int metric(PaintDeviceMetric m) const;
-
-public:
-    MPaintDevice()
-        : QPaintDevice() {}
-    virtual QPaintEngine* paintEngine() const;
-    virtual ~MPaintDevice() {}
-};
-
-//---------------------------------------------------------
 //   MScore
 //    MuseScore application object
 //---------------------------------------------------------
@@ -326,15 +300,10 @@ public:
 class MScore
 {
     Q_GADGET
-    static MStyle _baseStyle;            // buildin initial style
-    static MStyle _defaultStyle;         // buildin modified by preferences
-    static MStyle* _defaultStyleForParts;
 
     static QString _globalShare;
     static int _hRaster, _vRaster;
     static bool _verticalOrientation;
-
-    static MPaintDevice* _paintDevice;
 
 public:
     enum class DirectionH : char {   /**.\{*/
@@ -343,24 +312,14 @@ public:
     enum class OrnamentStyle : char {   /**.\{*/
         DEFAULT, BAROQUE                                          /**\}*/
     };
-    Q_ENUM(DirectionH);
-    Q_ENUM(OrnamentStyle);
+    Q_ENUM(DirectionH)
+    Q_ENUM(OrnamentStyle)
 
     static MsError _error;
     static std::vector<MScoreError> errorList;
 
     static void init();
     static void registerUiTypes();
-
-    static MStyle& baseStyle() { return _baseStyle; }
-    static void setBaseStyle(const MStyle& style) { _baseStyle = style; }
-    static MStyle& defaultStyle() { return _defaultStyle; }
-    static const MStyle* defaultStyleForParts() { return _defaultStyleForParts; }
-
-    static bool readDefaultStyle(QString file);
-    static bool readPartStyle(QString filePath);
-    static void setDefaultStyle(const MStyle& s) { _defaultStyle = s; }
-    static void defaultStyleForPartsHasChanged();
 
     static const QString& globalShare() { return _globalShare; }
     static qreal hRaster() { return _hRaster; }
@@ -426,8 +385,6 @@ public:
     static qreal verticalPageGap;
     static qreal horizontalPageGapEven;
     static qreal horizontalPageGapOdd;
-
-    static MPaintDevice* paintDevice();
 
     static void setError(MsError e) { _error = e; }
     static const char* errorMessage();

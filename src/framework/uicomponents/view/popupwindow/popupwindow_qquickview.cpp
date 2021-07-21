@@ -106,9 +106,13 @@ void PopupWindow_QQuickView::forceActiveFocus()
 
 void PopupWindow_QQuickView::show(QPoint p)
 {
+    QWindow* top = mainWindow()->topWindow();
+
     m_view->setPosition(p);
-    m_view->setTransientParent(mainWindow()->qWindow());
+    m_view->setTransientParent(top);
     m_view->show();
+
+    mainWindow()->pushWindow(m_view);
 
     m_view->requestActivate();
 
@@ -120,8 +124,14 @@ void PopupWindow_QQuickView::show(QPoint p)
     });
 }
 
+void PopupWindow_QQuickView::setPosition(QPoint p)
+{
+    m_view->setPosition(p);
+}
+
 void PopupWindow_QQuickView::hide()
 {
+    mainWindow()->popWindow(m_view);
     m_view->hide();
 }
 
@@ -132,12 +142,17 @@ QWindow* PopupWindow_QQuickView::qWindow() const
 
 bool PopupWindow_QQuickView::isVisible() const
 {
-    return m_view->isVisible();
+    return m_view ? m_view->isVisible() : false;
 }
 
 QRect PopupWindow_QQuickView::geometry() const
 {
-    return m_view->geometry();
+    return m_view ? m_view->geometry() : QRect();
+}
+
+void PopupWindow_QQuickView::setPosition(const QPoint& position) const
+{
+    m_view->setPosition(position);
 }
 
 void PopupWindow_QQuickView::setOnHidden(const std::function<void()>& callback)

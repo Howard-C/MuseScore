@@ -37,7 +37,9 @@ Item {
     property bool custom: false
     property bool unresolved: false
 
-    property PaletteWorkspace paletteWorkspace
+    property bool isInVisibleArea: true
+
+    property PaletteProvider paletteProvider
     property var modelIndex: null
 
     property NavigationPanel navigationPanel: null
@@ -128,7 +130,7 @@ Item {
 
         z: 1000
 
-        visible: root.expanded || root.hovered || isMenuOpened || navigation.active
+        visible: (root.expanded || root.hovered || isMenuOpened || navigation.active) && root.isInVisibleArea
 
         navigation.panel: root.navigationPanel
         navigation.row: root.navigationRow
@@ -152,9 +154,9 @@ Item {
             case "hide": root.hidePaletteRequested(); break
             case "new": root.insertNewPaletteRequested(); break
             case "edit": root.enableEditingToggled(!root.editingEnabled); break
-            case "reset": root.paletteWorkspace.resetPalette(root.modelIndex); break
-            case "save": root.paletteWorkspace.savePalette(root.modelIndex); break
-            case "load": root.paletteWorkspace.loadPalette(root.modelIndex); break
+            case "reset": root.paletteProvider.resetPalette(root.modelIndex); break
+            case "save": root.paletteProvider.savePalette(root.modelIndex); break
+            case "load": root.paletteProvider.loadPalette(root.modelIndex); break
             case "properties": Qt.callLater(root.editPalettePropertiesRequested); break
             }
         }

@@ -23,13 +23,15 @@
 #define MU_DRAW_BUFFEREDDRAWTYPES_H
 
 #include <memory>
-#include <QPainterPath>
-#include <QBrush>
-#include <QPen>
 
-#include "geometry.h"
+#include "brush.h"
 #include "drawtypes.h"
+#include "geometry.h"
 #include "font.h"
+#include "pen.h"
+#include "pixmap.h"
+#include "transform.h"
+#include "painterpath.h"
 
 namespace mu::draw {
 enum class DrawMode {
@@ -44,16 +46,16 @@ struct Scale {
 };
 
 struct DrawPath {
-    QPainterPath path;
-    QPen pen;
-    QBrush brush;
+    PainterPath path;
+    Pen pen;
+    Brush brush;
     DrawMode mode = DrawMode::StrokeAndFill;
 };
 
 struct DrawRect {
     RectF rect;
-    QPen pen;
-    QBrush brush;
+    Pen pen;
+    Brush brush;
     DrawMode mode = DrawMode::StrokeAndFill;
 };
 
@@ -75,22 +77,22 @@ struct DrawRectText {
 
 struct DrawPixmap {
     PointF pos;
-    QPixmap pm;
+    Pixmap pm;
 };
 
 struct DrawTiledPixmap {
     RectF rect;
-    QPixmap pm;
+    Pixmap pm;
     PointF offset;
 };
 
 struct DrawData
 {
     struct State {
-        QPen pen;
-        QBrush brush;
+        Pen pen;
+        Brush brush;
         Font font;
-        QTransform transform;
+        Transform transform;
         bool isAntialiasing = false;
         CompositionMode compositionMode = CompositionMode::SourceOver;
     };

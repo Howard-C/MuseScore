@@ -32,10 +32,41 @@ Loader {
 
     property bool isMenuOpened: Boolean(loader.menu) && loader.menu.isOpened
 
-    function toggleOpened(model, navigationParentControl, x = 0, y = 0) {
-        if (!loader.sourceComponent) {
-            loader.sourceComponent = itemMenuComp
+    QtObject {
+        id: prv
+
+        function loadMenu() {
+            if (!loader.sourceComponent) {
+                loader.sourceComponent = itemMenuComp
+            }
         }
+
+        function unloadMenu() {
+            loader.sourceComponent = null
+        }
+    }
+
+    function open(model, navigationParentControl, x = 0, y = 0) {
+        prv.loadMenu()
+
+        var menu = loader.menu
+        menu.parent = loader.parent
+        if (navigationParentControl) {
+            menu.navigationParentControl = navigationParentControl
+            menu.navigation.name = navigationParentControl.name + "PopupMenu"
+        }
+        menu.anchorItem = menuAnchorItem
+
+        update(model, x, y)
+        menu.open()
+
+        if (!menu.focusOnSelected()) {
+            menu.focusOnFirstItem()
+        }
+    }
+
+    function toggleOpened(model, navigationParentControl, x = 0, y = 0) {
+        prv.loadMenu()
 
         var menu = loader.menu
         if (menu.isOpened) {
@@ -43,12 +74,29 @@ Loader {
             return
         }
 
-        menu.parent = loader.parent
-        if (navigationParentControl) {
-            menu.navigationParentControl = navigationParentControl
-            menu.navigation.name = navigationParentControl.name + "PopupMenu"
+        open(model, navigationParentControl, x, y)
+    }
+
+    function toggleOpenedWithAlign(model, navigationParentControl, align) {
+        prv.loadMenu()
+
+        loader.menu.preferredAlign = align
+
+        toggleOpened(model, navigationParentControl)
+    }
+
+    function close() {
+        if (loader.isMenuOpened) {
+            loader.menu.close()
         }
-        menu.anchorItem = menuAnchorItem
+    }
+
+    function update(model, x = 0, y = 0) {
+        var menu = loader.menu
+        if (!Boolean(menu)) {
+            return
+        }
+
         menu.model = model
 
         if (x !== 0) {
@@ -58,20 +106,11 @@ Loader {
         if (y !== 0) {
             menu.y = y
         }
-
-        menu.open()
-
-        if (!menu.focusOnSelected()) {
-            menu.focusOnFirstItem()
-        }
-    }
-
-    function unloadMenu() {
-        loader.sourceComponent = null
     }
 
     Component {
         id: itemMenuComp
+
         StyledMenu {
             id: itemMenu
 
@@ -81,7 +120,7 @@ Loader {
             }
 
             onClosed: {
-                Qt.callLater(loader.unloadMenu)
+                Qt.callLater(prv.unloadMenu)
             }
         }
     }

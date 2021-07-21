@@ -25,12 +25,13 @@
 #include <vector>
 #include <stack>
 
-#include <QPen>
 #include <QBrush>
 #include <QFont>
 
 #include "ipaintprovider.h"
 #include "buffereddrawtypes.h"
+#include "pen.h"
+#include "brush.h"
 
 namespace mu::draw {
 class DrawObjectsLogger;
@@ -39,9 +40,6 @@ class BufferedPaintProvider : public IPaintProvider
 public:
     BufferedPaintProvider();
     ~BufferedPaintProvider();
-
-    QPaintDevice* device() const override;
-    QPainter* qpainter() const override;
 
     bool isActive() const override;
     void beginTarget(const std::string& name) override;
@@ -57,21 +55,21 @@ public:
     void setFont(const Font& font) override;
     const Font& font() const override;
 
-    void setPen(const QPen& pen) override;
+    void setPen(const Pen& pen) override;
     void setNoPen() override;
-    const QPen& pen() const override;
+    const Pen& pen() const override;
 
-    void setBrush(const QBrush& brush) override;
-    const QBrush& brush() const override;
+    void setBrush(const Brush& brush) override;
+    const Brush& brush() const override;
 
     void save() override;
     void restore() override;
 
-    void setTransform(const QTransform& transform) override;
-    const QTransform& transform() const override;
+    void setTransform(const Transform& transform) override;
+    const Transform& transform() const override;
 
     // drawing functions
-    void drawPath(const QPainterPath& path) override;
+    void drawPath(const PainterPath& path) override;
     void drawPolygon(const PointF* points, size_t pointCount, PolygonMode mode) override;
 
     void drawText(const PointF& point, const QString& text) override;
@@ -80,8 +78,8 @@ public:
 
     void drawSymbol(const PointF& point, uint ucs4Code) override;
 
-    void drawPixmap(const PointF& p, const QPixmap& pm) override;
-    void drawTiledPixmap(const RectF& rect, const QPixmap& pm, const PointF& offset = PointF()) override;
+    void drawPixmap(const PointF& p, const Pixmap& pm) override;
+    void drawTiledPixmap(const RectF& rect, const Pixmap& pm, const PointF& offset = PointF()) override;
 
     // ---
 

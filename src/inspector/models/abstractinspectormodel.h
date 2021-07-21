@@ -24,9 +24,11 @@
 
 #include <QList>
 #include <functional>
+
+#include "engraving/style/style.h"
+
 #include "libmscore/element.h"
 #include "libmscore/score.h"
-#include "libmscore/style.h"
 #include "libmscore/property.h"
 
 #include "internal/interfaces/ielementrepositoryservice.h"
@@ -35,6 +37,7 @@
 #include "actions/iactionsdispatcher.h"
 #include "modularity/ioc.h"
 #include "models/propertyitem.h"
+#include "ui/view/iconcodes.h"
 
 namespace mu::inspector {
 class AbstractInspectorModel : public QObject
@@ -45,6 +48,7 @@ class AbstractInspectorModel : public QObject
     INJECT(inspector, actions::IActionsDispatcher, dispatcher)
 
     Q_PROPERTY(QString title READ title CONSTANT)
+    Q_PROPERTY(int icon READ icon CONSTANT)
     Q_PROPERTY(InspectorSectionType sectionType READ sectionType CONSTANT)
     Q_PROPERTY(InspectorModelType modelType READ modelType CONSTANT)
     Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged)
@@ -108,6 +112,7 @@ public:
     Q_INVOKABLE virtual void requestResetToDefaults();
 
     QString title() const;
+    int icon() const;
     InspectorSectionType sectionType() const;
     InspectorModelType modelType() const;
 
@@ -115,6 +120,8 @@ public:
 
     static QList<Ms::ElementType> supportedElementTypesBySectionType(const InspectorSectionType sectionType);
     static InspectorSectionType sectionTypeFromElementType(const Ms::ElementType elementType);
+    static InspectorModelType notationElementModelType(const Ms::ElementType elementType);
+    static Ms::ElementType elementType(const InspectorModelType modelType);
 
     virtual bool hasAcceptableElements() const;
 
@@ -125,6 +132,7 @@ public:
 
 public slots:
     void setTitle(QString title);
+    void setIcon(ui::IconCode::Code icon);
     void setSectionType(InspectorSectionType sectionType);
     void setModelType(InspectorModelType modelType);
     void setIsEmpty(bool isEmpty);
@@ -171,6 +179,7 @@ private:
     Ms::Sid styleIdByPropertyId(const Ms::Pid pid) const;
 
     QString m_title;
+    ui::IconCode::Code m_icon;
     InspectorSectionType m_sectionType = InspectorSectionType::SECTION_UNDEFINED;
     InspectorModelType m_modelType = InspectorModelType::TYPE_UNDEFINED;
     bool m_isEmpty = false;

@@ -152,12 +152,14 @@ set(LINK_LIB ${LINK_LIB}
     midi
     midi_old
     userscores
+    learn
     notation
+    project
     commonscene
     palette
     inspector
     playback
-    instruments
+    instrumentsscene
     converter
     )
 

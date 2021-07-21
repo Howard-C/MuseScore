@@ -179,6 +179,7 @@ const mu::ui::ToolConfig& PlaybackUiActions::defaultPlaybackToolConfig()
             { "loop", true },
             { "loop-in", true },
             { "loop-out", true },
+            { "metronome", true },
         };
     }
     return config;

@@ -46,7 +46,6 @@ static const std::string MUSICXML_LICENSE_DEED_URL("https://www.w3.org/community
 static const std::string UTM_MEDIUM_MENU("menu");
 
 static const QString NOTATION_NAVIGATOR_VISIBLE_KEY("showNavigator");
-static const QString NOTATION_STATUSBAR_VISIBLE_KEY("showStatusBar");
 static const Settings::Key SPLASH_SCREEN_VISIBLE_KEY(module_name, "ui/application/startup/showSplashScreen");
 static const Settings::Key TOURS_VISIBLE_KEY(module_name, "ui/application/startup/showTours");
 
@@ -65,7 +64,7 @@ StartupSessionType AppShellConfiguration::startupSessionType() const
 
 void AppShellConfiguration::setStartupSessionType(StartupSessionType type)
 {
-    settings()->setValue(STARTUP_SESSION_TYPE, Val(static_cast<int>(type)));
+    settings()->setSharedValue(STARTUP_SESSION_TYPE, Val(static_cast<int>(type)));
 }
 
 mu::io::path AppShellConfiguration::startupScorePath() const
@@ -75,7 +74,7 @@ mu::io::path AppShellConfiguration::startupScorePath() const
 
 void AppShellConfiguration::setStartupScorePath(const io::path& scorePath)
 {
-    settings()->setValue(STARTUP_SCORE_PATH, Val(scorePath.toStdString()));
+    settings()->setSharedValue(STARTUP_SCORE_PATH, Val(scorePath.toStdString()));
 }
 
 bool AppShellConfiguration::isAppUpdatable() const
@@ -94,7 +93,7 @@ bool AppShellConfiguration::needCheckForUpdate() const
 
 void AppShellConfiguration::setNeedCheckForUpdate(bool needCheck)
 {
-    settings()->setValue(CHECK_FOR_UPDATE_KEY, Val(needCheck));
+    settings()->setSharedValue(CHECK_FOR_UPDATE_KEY, Val(needCheck));
 }
 
 std::string AppShellConfiguration::handbookUrl() const
@@ -167,21 +166,6 @@ mu::ValCh<mu::io::paths> AppShellConfiguration::recentScorePaths() const
     return userScoresConfiguration()->recentScorePaths();
 }
 
-bool AppShellConfiguration::isNotationStatusBarVisible() const
-{
-    return uiConfiguration()->isVisible(NOTATION_STATUSBAR_VISIBLE_KEY);
-}
-
-void AppShellConfiguration::setIsNotationStatusBarVisible(bool visible) const
-{
-    uiConfiguration()->setIsVisible(NOTATION_STATUSBAR_VISIBLE_KEY, visible);
-}
-
-mu::async::Notification AppShellConfiguration::isNotationStatusBarVisibleChanged() const
-{
-    return uiConfiguration()->isVisibleChanged(NOTATION_STATUSBAR_VISIBLE_KEY);
-}
-
 bool AppShellConfiguration::isNotationNavigatorVisible() const
 {
     return uiConfiguration()->isVisible(NOTATION_NAVIGATOR_VISIBLE_KEY, false);
@@ -204,7 +188,7 @@ bool AppShellConfiguration::needShowSplashScreen() const
 
 void AppShellConfiguration::setNeedShowSplashScreen(bool show)
 {
-    settings()->setValue(SPLASH_SCREEN_VISIBLE_KEY, Val(show));
+    settings()->setSharedValue(SPLASH_SCREEN_VISIBLE_KEY, Val(show));
 }
 
 bool AppShellConfiguration::needShowTours() const
@@ -214,7 +198,7 @@ bool AppShellConfiguration::needShowTours() const
 
 void AppShellConfiguration::setNeedShowTours(bool show)
 {
-    settings()->setValue(TOURS_VISIBLE_KEY, Val(show));
+    settings()->setSharedValue(TOURS_VISIBLE_KEY, Val(show));
 }
 
 void AppShellConfiguration::startEditSettings()

@@ -36,24 +36,29 @@ InspectorSectionView {
 
     implicitHeight: contentColumn.height
 
-    Column {
+    ColumnLayout {
         id: contentColumn
 
-        height: implicitHeight
         width: parent.width
 
-        spacing: 16
+        spacing: 12
 
-        Item {
-
-            height: childrenRect.height
+        GridLayout {
             width: parent.width
 
+            columns: 2
+
+            rowSpacing: 12
+            columnSpacing: 4
+
             CheckBox {
-                anchors.left: parent.left
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width / 2
+
                 navigation.panel: root.navigationPanel
                 navigation.name: "Visible"
                 navigation.row: root.navigationRow(1)
+
                 text: qsTrc("inspector", "Visible")
 
                 isIndeterminate: model ? model.isVisible.isUndefined : false
@@ -63,8 +68,9 @@ InspectorSectionView {
             }
 
             CheckBox {
-                anchors.left: parent.horizontalCenter
-                anchors.leftMargin: 6
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width / 2
+
                 navigation.panel: root.navigationPanel
                 navigation.name: "Cue size"
                 navigation.row: root.navigationRow(2)
@@ -77,20 +83,16 @@ InspectorSectionView {
 
                 onClicked: { model.isSmall.value = !checked }
             }
-        }
-
-        Item {
-
-            height: childrenRect.height
-            width: root.width
 
             CheckBox {
-                anchors.left: parent.left
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width / 2
+
                 navigation.panel: root.navigationPanel
                 navigation.name: "Auto-place"
                 navigation.row: root.navigationRow(3)
-                text: qsTrc("inspector", "Auto-place")
 
+                text: qsTrc("inspector", "Auto-place")
                 isIndeterminate: model ? model.isAutoPlaceAllowed.isUndefined : false
                 checked: model && !model.isAutoPlaceAllowed.isUndefined ? model.isAutoPlaceAllowed.value : false
 
@@ -98,8 +100,9 @@ InspectorSectionView {
             }
 
             CheckBox {
-                anchors.left: parent.horizontalCenter
-                anchors.leftMargin: 6
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width / 2
+
                 navigation.panel: root.navigationPanel
                 navigation.name: "Play"
                 navigation.row: root.navigationRow(4)
@@ -114,17 +117,17 @@ InspectorSectionView {
             }
         }
 
-        Row {
-            id: popupButtonsRow
-
+        GridLayout {
             width: parent.width
 
-            spacing: 4
+            columns: 2
+            columnSpacing: 4
 
-            FlatButton {
+            PopupViewButton {
                 id: playbackButton
 
-                width: (parent.width - popupButtonsRow.spacing)/ 2
+                popupAvailableWidth: parent ? parent.width : 0
+                anchorItem: root.anchorItem
 
                 navigation.panel: root.navigationPanel
                 navigation.name: "Playback"
@@ -133,25 +136,26 @@ InspectorSectionView {
                 icon: IconCode.AUDIO
                 text: qsTrc("inspector", "Playback")
 
-                onClicked: {
-                    if (playbackPopup.isOpened) {
-                        playbackPopup.close()
-                    } else {
-                        playbackPopup.open()
-                    }
+                popupContent: PlaybackSettings {
+                    id: playbackSettings
+                    navigationPanel: playbackButton.popup.navigation
+                    proxyModel: model ? model.playbackProxyModel : null
                 }
 
-                PlaybackPopup {
-                    id: playbackPopup
-                    navigationParentControl: playbackButton.navigation
-                    proxyModel: model ? model.playbackProxyModel : null
+                onPopupOpened: {
+                    playbackSettings.focusOnFirstTab()
+                }
+
+                onEnsureContentVisibleRequested: {
+                    root.ensureContentVisibleRequested(invisibleContentHeight)
                 }
             }
 
-            FlatButton {
+            PopupViewButton {
                 id: appearanceButton
 
-                width: (parent.width - popupButtonsRow.spacing)/ 2
+                popupAvailableWidth: parent ? parent.width : 0
+                anchorItem: root.anchorItem
 
                 navigation.panel: root.navigationPanel
                 navigation.name: "Appearance"
@@ -160,18 +164,18 @@ InspectorSectionView {
                 icon: IconCode.POSITION_ARROWS
                 text: qsTrc("inspector", "Appearance")
 
-                onClicked: {
-                    if (appearancePopup.isOpened) {
-                        appearancePopup.close()
-                    } else {
-                        appearancePopup.open()
-                    }
+                popupContent: AppearanceSettings {
+                    id: appearanceSettings
+                    navigationPanel: appearanceButton.popup.navigation
+                    model: root.model ? root.model.appearanceSettingsModel : null
                 }
 
-                AppearancePopup {
-                    id: appearancePopup
-                    navigationParentControl: appearanceButton.navigation
-                    model: root.model ? root.model.appearanceSettingsModel : null
+                onPopupOpened: {
+                    appearanceSettings.focusOnFirst()
+                }
+
+                onEnsureContentVisibleRequested: {
+                    root.ensureContentVisibleRequested(invisibleContentHeight)
                 }
             }
         }

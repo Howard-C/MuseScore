@@ -27,9 +27,12 @@ import MuseScore.UiComponents 1.0
 FocusScope {
     id: root
 
-    property QtObject model: undefined
+    property QtObject model: null
     property NavigationPanel navigationPanel: null
     property int navigationRowOffset: 1
+
+    property var anchorItem: null
+    signal ensureContentVisibleRequested(int invisibleContentHeight)
 
     property var contentHeight: implicitHeight
     signal contentExtended()

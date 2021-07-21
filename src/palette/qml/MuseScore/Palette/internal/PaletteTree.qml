@@ -33,9 +33,9 @@ import "utils.js" as Utils
 ListView {
     id: paletteTree
 
-    property PaletteWorkspace paletteWorkspace
-    property var paletteModel: Boolean(paletteWorkspace) ? paletteWorkspace.mainPaletteModel : null
-    property PaletteController paletteController: paletteWorkspace ? paletteWorkspace.mainPaletteController : null
+    property PaletteProvider paletteProvider
+    property var paletteModel: Boolean(paletteProvider) ? paletteProvider.mainPaletteModel : null
+    property PaletteController paletteController: paletteProvider ? paletteProvider.mainPaletteController : null
 
     property alias navigation: keynavTree
 
@@ -58,7 +58,6 @@ ListView {
 
     Accessible.name: qsTrc("palette", "Palettes Tree, contains %n palette(s)", "", count)
 
-
     NavigationPanel {
         id: keynavTree
         name: "PalettesTree"
@@ -71,8 +70,8 @@ ListView {
     }
 
     onSearchOpenedChanged: {
-        if (paletteWorkspace) {
-            paletteWorkspace.setSearching(searchOpened)
+        if (paletteProvider) {
+            paletteProvider.setSearching(searchOpened)
         }
     }
 
@@ -450,6 +449,8 @@ ListView {
                     hovered: control.hovered
                     text: model.display
 
+                    isInVisibleArea: control.y >= paletteTree.contentY && control.y < (paletteTree.contentY + paletteTree.height)
+
                     navigationPanel: keynavTree
                     navigationRow: control.navigationRow
 
@@ -476,7 +477,7 @@ ListView {
                     onInsertNewPaletteRequested: paletteTree.insertCustomPalette(control.rowIndex);
                     onHidePaletteRequested: control.hidePalette();
 
-                    paletteWorkspace: paletteTree.paletteWorkspace
+                    paletteProvider: paletteTree.paletteProvider
                     modelIndex: control.modelIndex
 
                     onEditPalettePropertiesRequested: {
@@ -523,6 +524,11 @@ ListView {
                         paletteController: paletteTree.paletteController
                         selectionModel: paletteSelectionModel
 
+                        isInVisibleArea: {
+                            var mainPaletteBottom = control.y + mainPalette.height
+                            return mainPaletteBottom >= paletteTree.contentY && mainPaletteBottom < (paletteTree.contentY + paletteTree.height)
+                        }
+
                         showMoreButton: !filter.length
                         onMoreButtonClicked: control.togglePopup(btn);
 
@@ -553,13 +559,13 @@ ListView {
                     onIsOpenedChanged: {
                         // build pool model on first popup appearance
                         if (visible && !poolPalette) {
-                            poolPalette = paletteTree.paletteWorkspace.poolPaletteModel(control.modelIndex);
-                            poolPaletteRootIndex = paletteTree.paletteWorkspace.poolPaletteIndex(control.modelIndex, poolPalette);
-                            poolPaletteController = paletteTree.paletteWorkspace.poolPaletteController(poolPalette, control.modelIndex);
+                            poolPalette = paletteTree.paletteProvider.poolPaletteModel(control.modelIndex);
+                            poolPaletteRootIndex = paletteTree.paletteProvider.poolPaletteIndex(control.modelIndex, poolPalette);
+                            poolPaletteController = paletteTree.paletteProvider.poolPaletteController(poolPalette, control.modelIndex);
 
-                            customPalette = paletteTree.paletteWorkspace.customElementsPaletteModel
-                            customPaletteRootIndex = paletteTree.paletteWorkspace.customElementsPaletteIndex(control.modelIndex) // TODO: make a property binding? (but that works incorrectly)
-                            customPaletteController = paletteTree.paletteWorkspace.customElementsPaletteController
+                            customPalette = paletteTree.paletteProvider.customElementsPaletteModel
+                            customPaletteRootIndex = paletteTree.paletteProvider.customElementsPaletteIndex(control.modelIndex) // TODO: make a property binding? (but that works incorrectly)
+                            customPaletteController = paletteTree.paletteProvider.customElementsPaletteController
                         }
                     }
 

@@ -58,6 +58,7 @@ public:
     virtual void showShadowNote(const PointF& pos) = 0;
 
     virtual void showContextMenu(const ElementType& elementType, const QPoint& pos) = 0;
+    virtual void hideContextMenu() = 0;
 
     virtual INotationInteractionPtr notationInteraction() const = 0;
     virtual INotationPlaybackPtr notationPlayback() const = 0;
@@ -98,6 +99,8 @@ public:
 private:
     INotationPtr currentNotation() const;
     INotationStylePtr notationStyle() const;
+    INotationInteractionPtr viewInteraction() const;
+    Element* hitElement() const;
 
     void zoomToPageWidth();
     void zoomToWholePage();
@@ -110,23 +113,17 @@ private:
 
     void setViewMode(const ViewMode& viewMode);
 
-    struct InteractData {
-        PointF beginPoint;
-        Element* hitElement = nullptr;
-        int hitStaffIndex = 0;
-    };
-
     bool isDragAllowed() const;
     void startDragElements(ElementType elementsType, const PointF& elementsOffset);
 
     float hitWidth() const;
 
+    bool needSelect(const QMouseEvent* event, const PointF& clickLogicPos) const;
     ElementType selectionType() const;
 
     double guiScalling() const;
 
     IControlledView* m_view = nullptr;
-    InteractData m_interactData;
 
     QList<int> m_possibleZoomsPercentage;
 
@@ -134,6 +131,7 @@ private:
     bool m_isCanvasDragged = false;
 
     bool m_isZoomInited = false;
+    PointF m_beginPoint;
 };
 }
 

@@ -340,7 +340,12 @@ void NotationPaintView::showContextMenu(const ElementType& elementType, const QP
         menuItems << menuItem.toMap();
     }
 
-    emit openContextMenuRequested(menuItems, pos);
+    emit showContextMenuRequested(menuItems, pos);
+}
+
+void NotationPaintView::hideContextMenu()
+{
+    emit hideContextMenuRequested();
 }
 
 void NotationPaintView::handleAction(const QString& actionCode)
@@ -361,7 +366,7 @@ void NotationPaintView::paint(QPainter* qp)
     RectF rect(0.0, 0.0, width(), height());
     paintBackground(rect, painter);
 
-    painter->setWorldTransform(m_matrix);
+    painter->setWorldTransform(mu::Transform::fromQTransform(m_matrix));
 
     notation()->paint(painter, toLogical(rect.toQRect()));
 

@@ -39,7 +39,9 @@
 
 using namespace mu;
 using namespace mu::converter;
+using namespace mu::project;
 using namespace mu::notation;
+using namespace mu::engraving;
 using namespace mu::io;
 
 static const std::string PNG_WRITER_NAME = "png";
@@ -187,29 +189,42 @@ Ret BackendApi::openOutputFile(QFile& file, const io::path& out)
     return ok ? make_ret(Ret::Code::Ok) : make_ret(Ret::Code::InternalError);
 }
 
-RetVal<notation::IMasterNotationPtr> BackendApi::openScore(const io::path& path, const io::path& stylePath, bool forceMode)
+RetVal<project::INotationProjectPtr> BackendApi::openProject(const io::path& path,
+                                                             const io::path& stylePath,
+                                                             bool forceMode)
 {
     TRACEFUNC
 
-    auto masterNotation = notationCreator()->newMasterNotation();
-    IF_ASSERT_FAILED(masterNotation) {
+    auto notationProject = notationCreator()->newNotationProject();
+    IF_ASSERT_FAILED(notationProject) {
         return make_ret(Ret::Code::InternalError);
     }
 
-    Ret ret = masterNotation->load(path, stylePath, forceMode);
+    Ret ret = notationProject->load(path, stylePath, forceMode);
     if (!ret) {
         LOGE() << "failed load: " << path << ", ret: " << ret.toString();
         return make_ret(Ret::Code::InternalError);
     }
 
-    INotationPtr notation = masterNotation->notation();
+    INotationPtr notation = notationProject->masterNotation()->notation();
     if (!notation) {
         return make_ret(Ret::Code::InternalError);
     }
 
     notation->setViewMode(ViewMode::PAGE);
 
-    return RetVal<notation::IMasterNotationPtr>::make_ok(masterNotation);
+    return RetVal<INotationProjectPtr>::make_ok(notationProject);
+}
+
+RetVal<notation::IMasterNotationPtr> BackendApi::openScore(const io::path& path, const io::path& stylePath, bool forceMode)
+{
+    TRACEFUNC
+    RetVal<INotationProjectPtr> prj = openProject(path, stylePath, forceMode);
+    if (!prj.ret) {
+        return prj.ret;
+    }
+
+    return RetVal<IMasterNotationPtr>::make_ok(prj.val->masterNotation());
 }
 
 PageList BackendApi::pages(const INotationPtr notation)
@@ -591,17 +606,22 @@ Ret BackendApi::doExportScoreTranspose(const INotationPtr notation, BackendJsonW
 
 RetVal<QByteArray> BackendApi::scorePartJson(Ms::Score* score, const std::string& fileName)
 {
-    QBuffer buffer;
-    buffer.open(QIODevice::WriteOnly);
+    QByteArray scoreData;
+    QBuffer buf(&scoreData);
 
-    bool ok = score->saveCompressedFile(&buffer, QString::fromStdString(fileName), false);
+    MscWriter::Params params;
+    params.device = &buf;
+    params.filePath = QString::fromStdString(fileName);
+    params.mode = MscIoMode::Zip;
+
+    MscWriter msczWriter(params);
+    msczWriter.open();
+
+    bool ok = score->writeMscz(msczWriter);
     if (!ok) {
-        LOGW() << "Error save compressed file";
+        LOGW() << "Error save mscz file";
     }
-
-    buffer.open(QIODevice::ReadOnly);
-    QByteArray scoreData = buffer.readAll();
-    buffer.close();
+    msczWriter.close();
 
     RetVal<QByteArray> result;
     result.ret = ok ? make_ret(Ret::Code::Ok) : make_ret(Ret::Code::InternalError);
@@ -700,15 +720,15 @@ Ret BackendApi::applyTranspose(const INotationPtr notation, const std::string& o
 
 Ret BackendApi::updateSource(const io::path& in, const std::string& newSource, bool forceMode)
 {
-    RetVal<IMasterNotationPtr> notation = openScore(in, NO_STYLE, forceMode);
+    RetVal<INotationProjectPtr> notation = openProject(in, NO_STYLE, forceMode);
     if (!notation.ret) {
         return notation.ret;
     }
 
-    Meta meta = notation.val->metaInfo();
+    Meta meta = notation.val->masterNotation()->metaInfo();
     meta.source = QString::fromStdString(newSource);
 
-    notation.val->setMetaInfo(meta);
+    notation.val->masterNotation()->setMetaInfo(meta);
 
     return notation.val->save();
 }

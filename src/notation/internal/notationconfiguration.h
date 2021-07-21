@@ -29,12 +29,14 @@
 #include "iglobalconfiguration.h"
 #include "settings.h"
 #include "system/ifilesystem.h"
+#include "engraving/iengravingconfiguration.h"
 
 namespace mu::notation {
 class NotationConfiguration : public INotationConfiguration, public async::Asyncable
 {
     INJECT(notation, ui::IUiConfiguration, uiConfiguration)
     INJECT(notation, framework::IGlobalConfiguration, globalConfiguration)
+    INJECT(notation, engraving::IEngravingConfiguration, engravingConfiguration)
     INJECT(notation, system::IFileSystem, fileSystem)
 
 public:
@@ -99,8 +101,9 @@ public:
     std::string fontFamily() const override;
     int fontSize() const override;
 
-    ValCh<io::path> stylesPath() const override;
-    void setStylesPath(const io::path& path) override;
+    io::path userStylesPath() const override;
+    void setUserStylesPath(const io::path& path) override;
+    async::Channel<io::path> userStylesPathChanged() const override;
 
     io::path defaultStyleFilePath() const override;
     void setDefaultStyleFilePath(const io::path& path) override;
@@ -144,14 +147,42 @@ public:
     int notePlayDurationMilliseconds() const override;
     void setNotePlayDurationMilliseconds(int durationMs) override;
 
+    void setTemplateModeEnalbed(bool enabled) override;
+    void setTestModeEnabled(bool enabled) override;
+
+    io::paths instrumentListPaths() const override;
+    async::Notification instrumentListPathsChanged() const override;
+
+    io::paths userInstrumentListPaths() const override;
+    void setUserInstrumentListPaths(const io::paths& paths) override;
+
+    io::paths scoreOrderListPaths() const override;
+    async::Notification scoreOrderListPathsChanged() const override;
+
+    io::paths userScoreOrderListPaths() const override;
+    void setUserScoreOrderListPaths(const io::paths& paths) override;
+
 private:
+    io::path firstInstrumentListPath() const;
+    void setFirstInstrumentListPath(const io::path& path);
+
+    io::path secondInstrumentListPath() const;
+    void setSecondInstrumentListPath(const io::path& path);
+
+    io::path firstScoreOrderListPath() const;
+    void setFirstScoreOrderListPath(const io::path& path);
+
+    io::path secondScoreOrderListPath() const;
+    void setSecondScoreOrderListPath(const io::path& path);
 
     async::Notification m_backgroundChanged;
     async::Notification m_foregroundChanged;
     async::Channel<int> m_currentZoomChanged;
     async::Channel<framework::Orientation> m_canvasOrientationChanged;
-    async::Channel<io::path> m_stylesPathChanged;
+    async::Channel<io::path> m_userStylesPathChanged;
     async::Channel<int> m_selectionColorChanged;
+    async::Notification m_instrumentListPathsChanged;
+    async::Notification m_scoreOrderListPathsChanged;
 };
 }
 

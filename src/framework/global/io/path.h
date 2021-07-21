@@ -70,13 +70,14 @@ inline mu::logger::Stream& operator<<(mu::logger::Stream& s, const mu::io::path&
     return s;
 }
 
-std::string syffix(const path& path);
+std::string suffix(const path& path);
 path filename(const path& path);
 path basename(const path& path);
 path completebasename(const path& path);
 path dirname(const path& path);
 path dirpath(const path& path);
 
+bool isAllowedFileName(const path& fn);
 path escapeFileName(const path& fn);
 
 paths pathsFromStrings(const QStringList& list);

@@ -47,9 +47,20 @@ public:
     // Visibility
     virtual void toggleVisible() = 0;
 
-    // Select
+    // Hit
     virtual Element* hitElement(const PointF& pos, float width) const = 0;
-    virtual int hitStaffIndex(const PointF& pos) const = 0;
+    virtual Staff* hitStaff(const PointF& pos) const = 0;
+
+    struct HitElementContext
+    {
+        notation::Element* element = nullptr;
+        notation::Staff* staff = nullptr;
+    };
+
+    virtual const HitElementContext& hitElementContext() const = 0;
+    virtual void setHitElementContext(const HitElementContext& context) = 0;
+
+    // Select
     virtual void addChordToSelection(MoveDirection d) = 0;
     virtual void moveChordNoteSelection(MoveDirection d) = 0;
     virtual void select(const std::vector<Element*>& elements, SelectType type, int staffIndex = 0) = 0;
@@ -93,6 +104,7 @@ public:
     virtual void editText(QKeyEvent* event) = 0;
     virtual void endEditText() = 0;
     virtual void changeTextCursorPosition(const PointF& newCursorPos) = 0;
+    virtual const TextBase* editedText() const = 0;
     virtual async::Notification textEditingStarted() const = 0;
     virtual async::Notification textEditingChanged() const = 0;
 
@@ -146,6 +158,8 @@ public:
 
     virtual void addStretch(qreal value) = 0;
 
+    virtual void addTimeSignature(Measure* measure, int staffIndex, TimeSignature* timeSignature) = 0;
+
     virtual void explodeSelectedStaff() = 0;
     virtual void implodeSelectedStaff() = 0;
 
@@ -165,6 +179,12 @@ public:
 
     virtual ScoreConfig scoreConfig() const = 0;
     virtual void setScoreConfig(ScoreConfig config) = 0;
+
+    virtual void nextLyrics(bool = false, bool = false, bool = true) = 0;
+    virtual void nextLyricsVerse(bool = false) = 0;
+    virtual void nextSyllable() = 0;
+    virtual void addMelisma() = 0;
+    virtual void addLyricsVerse() = 0;
 };
 
 using INotationInteractionPtr = std::shared_ptr<INotationInteraction>;

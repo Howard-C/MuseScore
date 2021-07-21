@@ -183,10 +183,15 @@ protected:
     virtual void beforeShow();
     virtual void onHidden();
 
+    void repositionWindowIfNeed();
+
     void setErrCode(Ret::Code code);
 
     QRect currentScreenGeometry() const;
     void updatePosition();
+    void updateContentPosition();
+
+    void updateView();
 
     QQuickItem* parentPopupContentItem() const;
     Qt::AlignmentFlag parentCascadeAlign(const QQuickItem* parent) const;

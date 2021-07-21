@@ -26,9 +26,14 @@
 #include "io/path.h"
 #include "workspacefile.h"
 
+#include "modularity/ioc.h"
+#include "multiinstances/imultiinstancesprovider.h"
+
 namespace mu::workspace {
 class Workspace : public IWorkspace
 {
+    INJECT(workspace, mi::IMultiInstancesProvider, multiInstancesProvider)
+
 public:
     Workspace(const io::path& filePath);
 
@@ -47,9 +52,7 @@ public:
     Ret save();
 
 private:
-
     WorkspaceFile m_file;
-    bool m_hasUnsavedChanges = false;
 };
 
 using WorkspacePtr = std::shared_ptr<Workspace>;
